@@ -40,6 +40,15 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 //setup Mongo connection
 MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     if(err) throw err;
+    var dblevels = db.collection('levels');
+    var dbusers = db.collection('users')
+
+//load rooms and contents into memory
+        var levelData = []
+        dblevels.find().toArray(function(err, results){
+            levelData = results;
+            //console.log(levelData);
+        });
 
     
 //Rooms and contents
@@ -78,7 +87,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
         db.collection("users").find().toArray(function(err, results){
             //console.log(results.length);
             for (i=0; i < results.length; i++){
-                console.log(results[i]);
+                //console.log(results[i]);
                 scoreboard.push(results[i].nickname);
                 scoreboard.push(results[i].score);
             }
@@ -108,9 +117,11 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     }
 
     function pushObjects(socket){
-        var objects = []
-        console.log(rooms.contents.length);
-        socket.emit('contents', rooms.contents);
+        //var objects = []
+        dblevels.findOne({name: socket.level}, function(err, results){
+            socket.emit('contents', results.contents);
+        });
+        
     }
 
     function checkCollision(object1, object2){
@@ -126,13 +137,13 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     }
 
     function roomJoined(room, socket) {
-        console.log(room);
+        console.log('Hello ' + room);
         if (room == 'Treasure Chest'){
             io.sockets.in(room).emit('question', currentQuestion );
 
         }
         if (room == 'Score Chest'){
-            console.log('pullingScoreboard');
+            //console.log('pullingScoreboard');
             pullScoreboard();
         }
         if (room == 'Stairs'){
@@ -229,32 +240,44 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
                     socket.x += 20;
                 }
             }
+            
             //console.log('detect collision');
-            //for (i = 0; i < rooms.contents.length; i++ ){
-            rooms.contents.forEach(function(chest){
-                //console.log(chest);
-                //console.log('=')
-                if(checkCollision(socket, chest)){
-                    //console.log(socket.collision);
-                    if(socket.collision == '') {
-                        console.log(socket.nickname + " " + chest.name);
-                        socket.collision = chest.name;
-                        socket.join(chest.name);
-                        roomJoined(chest.name, socket);
-                    }
 
-                }
-                else{
-                    if(socket.collision == chest.name) {
-                        socket.collision = '';
-                        socket.leave(chest.name);
-                        socket.emit('uncollide', true);
-                        console.log('leaving' + socket.nickname + " " + chest.name);
-                    }
-                }
-
+            var socketLevelObjects = levelData.filter(function(obj){
+                //console.log(obj.name);
+                //console.log(socket.level);
+                return (obj.name == socket.level);
             });
-            //}
+            //console.log(socketLevelObjects[0]);
+            try {
+                //console.log('trying');
+                socketLevelObjects[0].contents.forEach(function(chest){
+                    //console.log(chest);
+                    if(checkCollision(socket, chest)){
+                        //console.log(socket.collision);
+                        if(socket.collision == '') {
+                            console.log(socket.nickname + " " + chest.name);
+                            socket.collision = chest.name;
+                            socket.join(chest.name);
+                            roomJoined(chest.name, socket);
+                        }
+
+                    }
+                    else{
+                        if(socket.collision == chest.name) {
+                            socket.collision = '';
+                            socket.leave(chest.name);
+                            socket.emit('uncollide', true);
+                            console.log('leaving' + socket.nickname + " " + chest.name);
+                        }
+                    }
+
+                });
+            }
+            catch(err)
+            {console.log('socket level probably not defined yet')} 
+
+
 
 
 

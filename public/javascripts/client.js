@@ -42,6 +42,7 @@ $( document ).ready(function() {
         var background = new createjs.Shape();
         background.graphics.beginFill(data).drawRect(0, 0, 700, 300);
         stage.addChildAt(background, 0);
+
     });
 
     function createAvatar(name) {
@@ -160,7 +161,7 @@ $( document ).ready(function() {
     }
 
     socket.on('contents', function (contents) {
-        console.log(contents);
+        //console.log(contents);
         contents.forEach(function (item) {
             //console.log(player.nickname);
             if (stage.getChildByName(item.name)) {
