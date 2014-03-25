@@ -40,7 +40,7 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 //setup Mongo connection
 MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     if(err) throw err;
-    var collection = db.collection('ScoresByUser');
+    
 
 //Rooms and contents
     var rooms = {roomNum: 1, contents: [    {name: 'Treasure Chest', type: 'chest', width: 20, height: 20, x: 50, y: 200},
@@ -75,7 +75,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
 //return scoreboard
     function pullScoreboard() {
         var scoreboard = [];
-        collection.find().toArray(function(err, results){
+        db.collection("users").find().toArray(function(err, results){
             //console.log(results.length);
             for (i=0; i < results.length; i++){
                 console.log(results[i]);
@@ -171,13 +171,13 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
             socket.level = 'level 2';
 
             //read user score from DB(insert if not exists) and set as current score
-            db.collection('ScoresByUser').findOne({nickname: socket.nickname}, function(err, results){
+            db.collection('users').findOne({nickname: socket.nickname}, function(err, results){
                 if(results){
                     //console.log(results.score);
                     socket.score = results.score;
                 }
                 else {
-                    db.collection('ScoresByUser').insert({nickname: socket.nickname, score: 0}, function(err){});
+                    db.collection('users').insert({nickname: socket.nickname, score: 0}, function(err){});
                     socket.score = 0;
                 }
             });
@@ -192,7 +192,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
             //console.log(currentQuestion.answer);
             if(data.answer == currentQuestion.answer) {
                 socket.score++;
-                collection.update({nickname: socket.nickname}, {$set: {score: socket.score}}, function(){
+                db.collection('users').update({nickname: socket.nickname}, {$set: {score: socket.score}}, function(){
                     pullScoreboard();
                 });
                 socket.emit('response', {message: 'You are Correct, new question in 3 seconds.'});
@@ -261,7 +261,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
             pushLocations();
         });
         socket.on('disconnect', function() {
-            db.collection('ScoresByUser').update({nickname: socket.nickname}, {$set: {score: socket.score}}, function(err, results){});
+            db.collection('users').update({nickname: socket.nickname}, {$set: {score: socket.score}}, function(err, results){});
             socket.broadcast.emit('removeAvatar', socket.nickname);
         });
 
