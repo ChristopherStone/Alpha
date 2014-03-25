@@ -40,8 +40,8 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 //setup Mongo connection
 MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     if(err) throw err;
-    
 
+    
 //Rooms and contents
     var rooms = {roomNum: 1, contents: [    {name: 'Treasure Chest', type: 'chest', width: 20, height: 20, x: 50, y: 200},
         {name: 'Score Chest', type: 'chest', width: 20, height: 20, x: 450, y: 100},
@@ -82,10 +82,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
                 scoreboard.push(results[i].nickname);
                 scoreboard.push(results[i].score);
             }
-            //scoreboard.push(user.nickname);
-            //scoreboard.push(user.score);
-            //console.log(scoreboard);
-            //return scoreboard;
+
             io.sockets.in('Score Chest').emit('scoreboard', scoreboard);
         });
     }
@@ -103,6 +100,8 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
         db.collection('levels').findOne({name: socket.level}, function(err, results){
             leveldata = results.color;
             socket.emit('loadLevel', leveldata)
+            pushObjects(socket);
+            pushLocations();
         });
 
         
@@ -137,8 +136,9 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
             pullScoreboard();
         }
         if (room == 'Stairs'){
-            socket.emit('loadLevel', {color: '#111111'});
             socket.join('level 2');
+            socket.level = 'level 2'
+            pushLevel(socket);
         }
     }
 
@@ -168,17 +168,18 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
             socket.width = 20;
             socket.height = 20;
             socket.collision = '';
-            socket.level = 'level 2';
 
             //read user score from DB(insert if not exists) and set as current score
             db.collection('users').findOne({nickname: socket.nickname}, function(err, results){
                 if(results){
                     //console.log(results.score);
                     socket.score = results.score;
+                    socket.level = results.level;
                 }
                 else {
-                    db.collection('users').insert({nickname: socket.nickname, score: 0}, function(err){});
+                    db.collection('users').insert({nickname: socket.nickname, score: 0, level: 'level 1'}, function(err){});
                     socket.score = 0;
+                    socket.level = 'level 1'
                 }
             });
             //end database read/insert

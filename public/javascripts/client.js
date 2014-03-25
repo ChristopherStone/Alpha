@@ -37,7 +37,7 @@ $( document ).ready(function() {
 
 //received after username submitted, loads from db query data for current level
     socket.on('loadLevel', function (data) {
-        stage.removeAllChildren
+        stage.removeAllChildren();
         console.log(data);
         var background = new createjs.Shape();
         background.graphics.beginFill(data).drawRect(0, 0, 700, 300);
