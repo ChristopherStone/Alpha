@@ -147,9 +147,16 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
             pullScoreboard();
         }
         if (room == 'Stairs'){
+            if(socket.level == 'level 1'){
             socket.join('level 2');
             socket.level = 'level 2'
             pushLevel(socket);
+            }
+            else{
+            socket.join('level 1');
+            socket.level = 'level 1'
+            pushLevel(socket);
+            }
         }
     }
 
