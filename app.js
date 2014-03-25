@@ -137,7 +137,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     }
 
     function roomJoined(room, socket) {
-        console.log('Hello ' + room);
+        //console.log('Hello ' + room);
         if (room == 'Treasure Chest'){
             io.sockets.in(room).emit('question', currentQuestion );
 
@@ -256,7 +256,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
                     if(checkCollision(socket, chest)){
                         //console.log(socket.collision);
                         if(socket.collision == '') {
-                            console.log(socket.nickname + " " + chest.name);
+                            //console.log(socket.nickname + " " + chest.name);
                             socket.collision = chest.name;
                             socket.join(chest.name);
                             roomJoined(chest.name, socket);
@@ -268,7 +268,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
                             socket.collision = '';
                             socket.leave(chest.name);
                             socket.emit('uncollide', true);
-                            console.log('leaving' + socket.nickname + " " + chest.name);
+                            //console.log('leaving' + socket.nickname + " " + chest.name);
                         }
                     }
 
