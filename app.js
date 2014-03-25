@@ -37,9 +37,9 @@ var server = http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
 
-MongoClient.connect('mongodb://127.0.0.1:27017/ScoresByUser', function(err, db) {
+//setup Mongo connection
+MongoClient.connect('mongodb://127.0.0.1:27017/Alpha', function(err, db) {
     if(err) throw err;
-
     var collection = db.collection('ScoresByUser');
 
 //Rooms and contents
@@ -48,7 +48,6 @@ MongoClient.connect('mongodb://127.0.0.1:27017/ScoresByUser', function(err, db) 
         {name: 'Stairs', type: 'stairs', width: 20, height: 20, x: 300, y: 200}
     ]
     };
-
 
 //Start of multiple choice system
     var questionArray = [
@@ -101,8 +100,12 @@ MongoClient.connect('mongodb://127.0.0.1:27017/ScoresByUser', function(err, db) 
 
     function pushLevel(socket){
         //get level data from db from socket.level
-        leveldata = {color: '#33CC33'};
-        socket.emit('loadLevel', leveldata)
+        db.collection('levels').findOne({name: socket.level}, function(err, results){
+            leveldata = results.color;
+            socket.emit('loadLevel', leveldata)
+        });
+
+        
     }
 
     function pushObjects(socket){
@@ -165,7 +168,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/ScoresByUser', function(err, db) 
             socket.width = 20;
             socket.height = 20;
             socket.collision = '';
-            socket.level = 'level 1';
+            socket.level = 'level 2';
 
             //read user score from DB(insert if not exists) and set as current score
             db.collection('ScoresByUser').findOne({nickname: socket.nickname}, function(err, results){

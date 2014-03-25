@@ -40,7 +40,7 @@ $( document ).ready(function() {
         stage.removeAllChildren
         console.log(data);
         var background = new createjs.Shape();
-        background.graphics.beginFill('#33CC33').drawRect(0, 0, 700, 300);
+        background.graphics.beginFill(data).drawRect(0, 0, 700, 300);
         stage.addChildAt(background, 0);
     });
 
