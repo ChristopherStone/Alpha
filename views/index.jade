@@ -1,5 +1,25 @@
 extends layout
 
+block extraHeader
+    script(src="/socket.io/socket.io.js")
+    script(src="http://code.jquery.com/jquery.js")
+    script(src="http://code.createjs.com/createjs-2013.12.12.min.js")
+    script(src="/javascripts/client.js")
+
+
 block content
-  h1= title
-  p Welcome to #{title}
+  canvas#GameCanvas(width="700", height="300")
+        |canvas not supported
+  div#gamearea(style="float: right")
+    div#username
+      |Username:
+      input(id="name")
+      button(id="submit") Submit
+
+    div#question
+
+    div.pure-menu.pure-menu-open.pure-menu-horizontal
+        ul#answers
+
+    div#scoreboard
+      ul#scores
