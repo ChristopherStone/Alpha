@@ -25,14 +25,16 @@ $( document ).ready(function() {
     console.log("socket connected");
     //handle keydown event pass to function
     document.onkeydown = handleKeyDown;
-    var stage = "";
+    //create the stage, but do not add the tick event (with update) until socket.on('inialize')
+    var stage = new createjs.Stage("GameCanvas");
 
     socket.on('initialize', function(){
         console.log('stage initialized');
-        var stage = new createjs.Stage("GameCanvas");
+        //var stage = new createjs.Stage("GameCanvas");
         createjs.Ticker.addEventListener("tick", handleTick);
         createjs.Ticker.setFPS(40);
     });
+
 //received after username submitted, loads from db query data for current level
     socket.on('loadLevel', function (data) {
         stage.removeAllChildren
